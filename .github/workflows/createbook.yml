@@ -1,0 +1,44 @@
+name: Convert Book to Audio
+on:
+  workflow_dispatch:
+    inputs:
+      speed:
+        description: 'Speech speed (0.1-2.0)'
+        required: true
+        default: '1.0'
+        type: string
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y espeak-ng
+          pip install abogen
+          
+      - name: Convert to M4B
+        run: |
+          for book in books/*; do
+            if [ -f "$book" ]; then
+              echo "Converting $book..."
+              abogen-cli "$book" --voice af --format m4b --speed ${{ github.event.inputs.speed }}
+            fi
+          done
+          
+      - name: Upload Audiobook
+        uses: actions/upload-artifact@v3
+        with:
+          name: audiobook
+          path: |
+            *.m4b
+            *.srt
+
