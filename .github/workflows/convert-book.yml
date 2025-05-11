@@ -26,6 +26,8 @@ jobs:
           pip install abogen
           
       - name: Convert to M4B
+        env:
+          QT_QPA_PLATFORM: offscreen
         run: |
           for book in books/*; do
             if [ -f "$book" ]; then
